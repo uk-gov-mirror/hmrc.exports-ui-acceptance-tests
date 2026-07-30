@@ -35,19 +35,18 @@ object DashboardPage extends BasePage {
 
   val path: String = "/dashboard\\?page=1"
 
-  def title: String = {
+  def selectedTab: WebElement =
+    findElementByCssSelector(".selected-status-group")
 
-    val cancelledPressed = cancelledTab.getAttribute("aria-pressed").equals("true")
-    val rejectedPressed = rejectedTab.getAttribute("aria-pressed").equals("true")
-    val actionNeededPressed = actionTab.getAttribute("aria-pressed").equals("true")
-
-    (cancelledPressed, rejectedPressed, actionNeededPressed) match {
-      case (true, _, _) => "Your cancelled and expired declarations"
-      case (_, true, _) => "Your rejected declarations"
-      case (_, _, true) => "Action needed on your declarations"
-      case _            => "Your submitted declarations"
+  def title: String =
+    selectedTab.getText.trim match {
+      case "Cancelled & expired" => "Your cancelled and expired declarations"
+      case "Rejected"            => "Your rejected declarations"
+      case "Action needed"       => "Action needed on your declarations"
+      case "Submitted"           => "Your submitted declarations"
+      case other =>
+        throw new IllegalStateException(s"Unexpected dashboard tab: $other")
     }
-  }
 
   override def checkExpanders(): Unit = ()
 
@@ -57,13 +56,13 @@ object DashboardPage extends BasePage {
 
   def mrnValue: WebElement = findElementByCssSelector("tr:nth-child(1) > td:nth-child(1)")
 
-  def rejectedTab: WebElement = findElementByCssSelector("#rejected-submissions-button")
+  def rejectedTab: WebElement = findElementByCssSelector("#rejected-submissions-tab")
 
-  def submittedTab: WebElement = findElementByCssSelector("#submitted-submissions-button")
+  def submittedTab: WebElement = findElementByCssSelector("#submitted-submissions-tab")
 
-  def actionTab: WebElement = findElementByCssSelector("#action-submissions-button")
+  def actionTab: WebElement = findElementByCssSelector("#action-submissions-tab")
 
-  def cancelledTab: WebElement = findElementByCssSelector("#cancelled-submissions-button")
+  def cancelledTab: WebElement = findElementByCssSelector("#cancelled-submissions-tab")
 
   // ex: validateDashboard("Submitted", "Declaration submitted")
 
@@ -95,10 +94,10 @@ object DashboardPage extends BasePage {
 
   def clickOnTab(tab: String): Unit =
     tab match {
-      case "Submitted"           => clickById("submitted-submissions-button")
-      case "Action needed"       => clickById("action-submissions-button")
-      case "Rejected"            => clickById("rejected-submissions-button")
-      case "Cancelled & expired" => clickById("cancelled-submissions-button")
+      case "Submitted"           => clickById("submitted-submissions-tab")
+      case "Action needed"       => clickById("action-submissions-tab")
+      case "Rejected"            => clickById("rejected-submissions-tab")
+      case "Cancelled & expired" => clickById("cancelled-submissions-tab")
     }
 
   def viewPaginationComponent(): Unit = {
